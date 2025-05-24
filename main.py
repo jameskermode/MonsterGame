@@ -17,11 +17,17 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 255, 255)
+BLACK = (0, 0, 0)
 player_size = 50
 player_pos = [WIDTH // 2, HEIGHT - player_size]
 player_speed = 5
 player_rect = pygame.Rect(player_pos[0], player_pos[1], player_size, player_size)
 health = 3  # Player health
+
+# Virtual buttons for touchscreen
+button_left = pygame.Rect(20, HEIGHT - 70, 60, 50)
+button_right = pygame.Rect(100, HEIGHT - 70, 60, 50)
+button_shoot = pygame.Rect(WIDTH - 80, HEIGHT - 70, 60, 50)
 
 # Bullet
 bullet_size = 5
@@ -80,6 +86,25 @@ def draw_window():
     # Draw ammo
     ammo_text = font.render(f"Ammo: {ammo}", True, (0, 0, 0))
     screen.blit(ammo_text, (10, 90))
+
+    # Left button
+    pygame.draw.rect(screen, (180, 180, 180), button_left)
+    pygame.draw.polygon(screen, BLACK, [
+        (30, HEIGHT - 45),       # Tip of arrow
+        (60, HEIGHT - 70),       # Top rear
+        (60, HEIGHT - 20)        # Bottom rear
+    ])
+
+    # Right button
+    pygame.draw.rect(screen, (180, 180, 180), button_right)
+    pygame.draw.polygon(screen, BLACK, [
+        (140, HEIGHT - 45),      # Tip of arrow (right side)
+        (110, HEIGHT - 70),      # Top rear
+        (110, HEIGHT - 20)       # Bottom rear
+    ])
+    pygame.draw.rect(screen, (200, 100, 100), button_shoot)
+    shoot_text = font.render("FIRE", True, WHITE)
+    screen.blit(shoot_text, (WIDTH - 75, HEIGHT - 55))
     
     pygame.display.update()
 
@@ -90,20 +115,42 @@ async def main():
     while running:
         clock.tick(60)  # Limit to 60 FPS
 
+        # Input flags
+        move_left = move_right = shoot = False
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type in (pygame.MOUSEBUTTONDOWN, pygame.FINGERDOWN):
+                pos = pygame.mouse.get_pos()
+                if button_left.collidepoint(pos):
+                    move_left = True
+                if button_right.collidepoint(pos):
+                    move_right = True
+                if button_shoot.collidepoint(pos):
+                    shoot = True
 
-        # Player movement
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT] and player_rect.left > 0:
+
+        # Apply movement
+        if move_left and player_rect.left > 0:
             player_rect.x -= player_speed
-        if keys[pygame.K_RIGHT] and player_rect.right < WIDTH:
+        if move_right and player_rect.right < WIDTH:
             player_rect.x += player_speed
-        if keys[pygame.K_SPACE] and ammo > 0:
+        if shoot:
             bullet = pygame.Rect(player_rect.centerx - bullet_size//2, player_rect.top, bullet_size, 10)
             bullets.append(bullet)
             ammo -= 1
+
+        # Player movement
+        # keys = pygame.key.get_pressed()
+        # if keys[pygame.K_LEFT] and player_rect.left > 0:
+        #     player_rect.x -= player_speed
+        # if keys[pygame.K_RIGHT] and player_rect.right < WIDTH:
+        #     player_rect.x += player_speed
+        # if keys[pygame.K_SPACE] and ammo > 0:
+        #     bullet = pygame.Rect(player_rect.centerx - bullet_size//2, player_rect.top, bullet_size, 10)
+        #     bullets.append(bullet)
+        #     ammo -= 1
 
         # Move bullets
         for bullet in bullets[:]:
