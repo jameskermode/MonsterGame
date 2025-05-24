@@ -55,10 +55,12 @@ font = pygame.font.SysFont(None, 36)
 
 clock = pygame.time.Clock()
 
+
 def spawn_monster():
     x = random.randint(0, WIDTH - monster_size)
     y = -monster_size
     monsters.append(pygame.Rect(x, y, monster_size, monster_size))
+
 
 def draw_window():
     screen.fill(WHITE)
@@ -88,24 +90,33 @@ def draw_window():
 
     # Left button
     pygame.draw.rect(screen, (180, 180, 180), button_left)
-    pygame.draw.polygon(screen, BLACK, [
-        (30, HEIGHT - 45),       # Tip of arrow
-        (60, HEIGHT - 70),       # Top rear
-        (60, HEIGHT - 20)        # Bottom rear
-    ])
+    pygame.draw.polygon(
+        screen,
+        BLACK,
+        [
+            (30, HEIGHT - 45),  # Tip of arrow
+            (60, HEIGHT - 70),  # Top rear
+            (60, HEIGHT - 20),  # Bottom rear
+        ],
+    )
 
     # Right button
     pygame.draw.rect(screen, (180, 180, 180), button_right)
-    pygame.draw.polygon(screen, BLACK, [
-        (140, HEIGHT - 45),      # Tip of arrow (right side)
-        (110, HEIGHT - 70),      # Top rear
-        (110, HEIGHT - 20)       # Bottom rear
-    ])
+    pygame.draw.polygon(
+        screen,
+        BLACK,
+        [
+            (140, HEIGHT - 45),  # Tip of arrow (right side)
+            (110, HEIGHT - 70),  # Top rear
+            (110, HEIGHT - 20),  # Bottom rear
+        ],
+    )
     pygame.draw.rect(screen, (200, 100, 100), button_shoot)
     shoot_text = font.render("FIRE", True, WHITE)
     screen.blit(shoot_text, (WIDTH - 75, HEIGHT - 55))
-    
+
     pygame.display.update()
+
 
 async def main():
     global score, health, last_spawn_time, ammo
@@ -129,14 +140,15 @@ async def main():
                 if button_shoot.collidepoint(pos):
                     shoot = True
 
-
         # Apply movement
         if move_left and player_rect.left > 0:
             player_rect.x -= player_speed
         if move_right and player_rect.right < WIDTH:
             player_rect.x += player_speed
         if shoot:
-            bullet = pygame.Rect(player_rect.centerx - bullet_size//2, player_rect.top, bullet_size, 10)
+            bullet = pygame.Rect(
+                player_rect.centerx - bullet_size // 2, player_rect.top, bullet_size, 10
+            )
             bullets.append(bullet)
             ammo -= 1
 
@@ -187,5 +199,6 @@ async def main():
 
         draw_window()
         await asyncio.sleep(0)
+
 
 asyncio.run(main())
